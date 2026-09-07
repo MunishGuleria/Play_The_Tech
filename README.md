@@ -47,7 +47,7 @@ DATABASE_URL=postgres://user:pass@server.postgres.database.azure.com:5432/playth
 ADMIN_EMAIL=you@example.com
 ADMIN_PASSWORD=<long random string>
 SESSION_SECRET=<long random string, signs the login cookie>
-SITE_URL=https://playthetech.com
+SITE_URL=https://www.playthetech.com
 ```
 
 `ADMIN_EMAIL` and `ADMIN_PASSWORD` are the only credentials that exist.
@@ -111,7 +111,7 @@ was not told rather than guessing (GUARDRAILS R2.5).
 ## Verifying a deploy
 
 ```bash
-npm run smoke -- https://playthetech.com
+npm run smoke -- https://www.playthetech.com
 ```
 
 Checks all eleven AI user-agents get a 200, that `<table>`, `<th scope>`, and

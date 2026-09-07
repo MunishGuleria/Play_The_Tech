@@ -33,8 +33,8 @@ arrive — with nothing in your analytics to indicate why.
 **Test it:**
 
 ```bash
-curl -A "ClaudeBot/1.0" -o /dev/null -w "%{http_code}\n" https://playthetech.com/
-curl -A "GPTBot/1.0"    -o /dev/null -w "%{http_code}\n" https://playthetech.com/
+curl -A "ClaudeBot/1.0" -o /dev/null -w "%{http_code}\n" https://www.playthetech.com/
+curl -A "GPTBot/1.0"    -o /dev/null -w "%{http_code}\n" https://www.playthetech.com/
 ```
 
 Both must return 200, run from outside Azure.
@@ -44,7 +44,7 @@ Both must return 200, run from outside Azure.
 ## 2 · The table must be in the raw HTML
 
 ```bash
-curl -s https://playthetech.com/compare/some-post | grep "<table"
+curl -s https://www.playthetech.com/compare/some-post | grep "<table"
 ```
 
 If that returns nothing, the page is invisible to most AI crawlers — they do

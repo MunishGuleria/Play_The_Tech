@@ -4,8 +4,8 @@
  * change — someone enabling an Azure security feature months from now, with no
  * idea it touches SEO, is the realistic way this breaks.
  *
- *   npm run smoke -- https://playthetech.com
- *   npm run smoke -- https://playthetech.com --slug my-post
+ *   npm run smoke -- https://www.playthetech.com
+ *   npm run smoke -- https://www.playthetech.com --slug my-post
  *
  * Run it from outside Azure. A request originating inside the tenancy can pass
  * a WAF rule that a real crawler fails.

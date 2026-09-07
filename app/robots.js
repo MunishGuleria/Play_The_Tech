@@ -1,67 +1,68 @@
 import { siteUrl } from '../lib/site.js'
 
-// Naming the AI crawlers explicitly is half the job. The other half is the
-// Azure WAF — allowing them here and blocking them at the edge is the silent
-// failure this whole project is most exposed to. LAUNCH-CHECKLIST §1.
-// Comprehensive list of all major modern AI search and LLM crawlers.
-// Allows OpenAI (ChatGPT/SearchGPT), Anthropic (Claude), Google (Gemini/AI Overviews),
-// Perplexity, Microsoft (Copilot/Bing), Apple Intelligence, Brave Leo, Meta AI, and Amazon.
+/**
+ * Active, verified AI search and LLM crawlers.
+ * Outdated/deprecated tokens removed (Claude-Web, anthropic-ai, MSNBot, BingPreview, Copilot, FacebookBot).
+ * Live citation agents added (Claude-User, Perplexity-User).
+ * Heavy scraper (Bytespider) explicitly disallowed.
+ */
 const AI_AGENTS = [
   // OpenAI (ChatGPT, SearchGPT, GPT-4/o)
   'GPTBot',
   'OAI-SearchBot',
   'ChatGPT-User',
-  // Anthropic (Claude, Claude 3.5/3.7, Artifacts)
+  // Anthropic (Claude citations & live retrieval)
   'ClaudeBot',
   'Claude-SearchBot',
-  'Claude-Web',
-  'anthropic-ai',
-  // Google (Gemini, AI Overviews, Search)
-  'Google-Extended',
-  'GoogleOther',
-  'GoogleOther-Image',
-  'GoogleOther-Video',
+  'Claude-User',
+  // Perplexity AI
+  'PerplexityBot',
+  'Perplexity-User',
+  // Google (Search, Gemini, AI Overviews)
   'Googlebot',
   'Googlebot-Image',
   'Googlebot-News',
-  // Perplexity AI
-  'PerplexityBot',
-  'Perplexity-Search',
-  // Microsoft Copilot & Bing
+  'GoogleOther',
+  'Google-Extended',
+  // Microsoft Bing & Copilot indexer
   'Bingbot',
-  'MSNBot',
-  'BingPreview',
-  'Copilot',
   // Apple Intelligence
   'Applebot',
   'Applebot-Extended',
-  // Brave AI (Leo)
-  'Bravebot',
-  // Meta AI (LLaMA)
+  // Meta AI
   'Meta-ExternalAgent',
-  'Meta-ExternalFetcher',
-  'FacebookBot',
-  // Amazon AI (Bedrock / Rufus)
+  // Amazon AI
   'Amazonbot',
-  // Cohere & Open Datasets
-  'cohere-ai',
+  // Brave AI
+  'Bravebot',
+  // Open Datasets / Research
   'CCBot',
   'Diffbot',
-  'Bytespider',
   'YouBot',
   'DuckDuckBot',
 ]
 
 export default function robots() {
   const base = siteUrl()
-  const disallow = ['/admin', '/admin/', '/api', '/api/']
+  const disallow = ['/admin', '/api']
 
   return {
     rules: [
-      { userAgent: '*', allow: '/', disallow },
-      ...AI_AGENTS.map((userAgent) => ({ userAgent, allow: '/', disallow })),
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow,
+      },
+      ...AI_AGENTS.map((userAgent) => ({
+        userAgent,
+        allow: '/',
+        disallow,
+      })),
+      {
+        userAgent: 'Bytespider',
+        disallow: ['/'],
+      },
     ],
     sitemap: [`${base}/sitemap.xml`, `${base}/feed.xml`],
-    host: new URL(base).host,
   }
 }

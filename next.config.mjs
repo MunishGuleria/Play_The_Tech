@@ -26,6 +26,15 @@ const securityHeaders = [
   { key: 'Content-Security-Policy-Report-Only', value: csp },
 ]
 
+// The canonical host. Must match CANONICAL_ORIGIN in lib/site.js.
+const CANONICAL_HOST = 'www.playthetech.com'
+
+// Every other host the deployment answers on. Left unredirected, each one is a
+// full duplicate of the site that Google can index separately and split link
+// equity across. Branch previews get their own generated hostnames and are not
+// listed here, so they keep working.
+const DUPLICATE_HOSTS = ['playthetech.com', 'play-the-tech-c6i8.vercel.app']
+
 const nextConfig = {
   poweredByHeader: false,
   compress: true,
@@ -52,6 +61,18 @@ const nextConfig = {
     //
     // `optimizeCss` used to sit here and did nothing: it is read only by
     // build/webpack-config.js, and this project builds with Turbopack.
+  },
+
+  // 308s, so the method and the ranking signals both survive the hop. Vercel
+  // can do apex→www at the edge too; this keeps the rule in the repo so it
+  // travels with the code and survives a dashboard change.
+  async redirects() {
+    return DUPLICATE_HOSTS.map((host) => ({
+      source: '/:path*',
+      has: [{ type: 'host', value: host }],
+      destination: `https://${CANONICAL_HOST}/:path*`,
+      permanent: true,
+    }))
   },
 
   async headers() {
