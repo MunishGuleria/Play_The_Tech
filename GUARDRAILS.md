@@ -5,31 +5,23 @@ it rather than proceeding.
 
 ---
 
-## 1 · Salezx and the conflict of interest
+## 1 · Vendor neutrality
 
-This site shares ownership with Salezx, which competes in categories this
-site compares. That is a real conflict, and it is the largest risk to the
-project.
+A comparison site has exactly one asset and it is being believed. Every rule
+below protects that, and every rule applies to every vendor equally.
 
-The danger is not legal. It is that one reader notices, says so publicly,
-and the site's credibility is gone permanently. A comparison site has
-exactly one asset and it is being believed.
-
-- **1.1** Any post where Salezx appears must show an ownership disclosure
-  **above the comparison table** — not in the footer, not below the fold.
-- **1.2** The disclosure states shared ownership plainly. Not "affiliated
-  with", not "partnered with".
-- **1.3** Salezx is judged on the same criteria, with the same evidence
-  standard, as every other tool.
-- **1.4** Never invent a comparison criterion that exists only in the post
-  where Salezx wins on it.
-- **1.5** If Salezx genuinely loses a comparison, publish it losing. A
-  comparison site that never ranks its owner second is a brochure, and
+- **1.1** Every vendor is judged on the same criteria, with the same evidence
+  standard.
+- **1.2** Never invent a comparison criterion that exists only in the post
+  where one vendor happens to win on it.
+- **1.3** If a vendor genuinely loses a comparison, publish it losing. A
+  comparison site whose rankings never surprise anyone is a brochure, and
   readers recognise one instantly.
-- **1.6** Never write a hit piece on a Salezx competitor dressed as a
-  comparison. Same evidence standard for their weaknesses as for Salezx's.
-- **1.7** Don't feature Salezx until the site has independent credibility —
-  a reasonable marker is 20+ published posts.
+- **1.4** Never write a hit piece dressed as a comparison. The same evidence
+  standard applies to a vendor's weaknesses as to its strengths.
+- **1.5** Display order is never an editorial reward. Sort alphabetically, or
+  by a stated and checkable metric. Never by hand — a hand-ordered list is a
+  ranking the reader cannot audit.
 
 ---
 
@@ -131,21 +123,13 @@ conclusion.
 
 ---
 
-## 8 · The four-site network
+## 8 · Outbound links
 
-The four sites all link to salezx.com and now share one Azure tenancy. That
-concentrates a footprint that reads as a link network.
-
-- **8.1** **Don't cross-link the four sites to each other.** This matters
-  more than every infrastructure mitigation combined. No shared footer, no
-  "our network" page, no reciprocal blogroll.
-- **8.2** Links to Salezx are in-content and editorially justified. Never
-  sitewide footer links, never identical anchor text across sites.
-- **8.3** Keep the staggered launch. Four sites going live the same week is
-  its own signal.
-- **8.4** Each site gets a genuinely different design, not one template
-  recoloured.
-
-Worth saying plainly: the disclosure rule in §1 isn't only an ethics
-position. A network that openly declares common ownership is doing the thing
-a manipulative network specifically avoids.
+- **8.1** Every outbound link is in-content and editorially justified. Never
+  sitewide footer links, never identical anchor text repeated across pages,
+  never a link on every page.
+- **8.2** No reciprocal linking with other sites sharing this hosting
+  tenancy. No shared footer, no "our network" page, no blogroll. This matters
+  more than every infrastructure mitigation combined.
+- **8.3** A vendor link is not a reward for anything. It exists because a
+  reader following it learns something the page could not tell them.

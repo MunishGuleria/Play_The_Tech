@@ -1,7 +1,7 @@
 # DEPLOYMENT.md
 
 Target: **Azure App Service**, Next.js, Azure Postgres, custom domain — and
-all four network sites on the same Azure tenancy.
+a custom domain on a shared Azure tenancy.
 
 Two risks and two benefits. The risks come first because they are the ones
 that cost you something silently.
@@ -75,55 +75,30 @@ Set up:
 
 ---
 
-## 3 · RISK — four sites, one host, all linking to Salezx
+## 3 · RISK — shared hosting footprint
 
-The four network sites all back-link to salezx.com. Putting all four on the
-same Azure tenancy concentrates a footprint that was previously spread
-across different providers.
-
-The pattern being created:
-
-- Four domains, same hosting infrastructure
-- Same IP range or ASN
-- Same registrar, similar registration dates
-- Same stack, same CMS, same build pipeline
-- Launched within weeks of each other
-- All linking to one commercial target
-
-That is a textbook private-blog-network signature, and it has been
-detectable for twenty years. The earlier plan — a different free host per
-site — was implicitly mitigating this. Consolidating removes that
-mitigation, so replace it deliberately.
+Running unrelated sites on one Azure tenancy concentrates a footprint that was
+previously spread across providers: same IP range or ASN, same stack, same
+build pipeline, similar registration dates. Search engines have read that
+pattern as a grouping signal for twenty years, and a site grouped with others
+it has nothing to do with inherits their problems.
 
 ### Mitigations, in order of importance
 
-1. **Do not cross-link the four sites to each other.** An interlinked ring
-   is far more detectable than four independent sites that happen to share a
-   host. No shared footer, no "our network" page, no reciprocal blogroll.
-   This one matters more than all the infrastructure separation combined.
+1. **Separate App Service Plans, ideally different regions.** Different
+   inbound IPs. One plan hosting several apps gives them all the same IP.
 
-2. **Separate App Service Plans, ideally different regions.** Different
-   inbound IPs. One plan hosting four apps gives all four the same IP.
+2. **Distinct design systems.** playthetech has its own locked direction in
+   `UI.md`. Anything else on the tenancy needs a genuinely different one, not
+   the same template recoloured.
 
-3. **Distinct design systems.** playthetech has its own locked direction in
-   `UI.md`. The other three need genuinely different ones — not the same
-   template recoloured.
+3. **Staggered launches.** Several sites going live on the same day is its own
+   signal.
 
-4. **Keep the staggered launch.** Weeks 1, 3, 5 as planned. Four sites going
-   live the same day is its own signal.
-
-5. **Links to Salezx must be editorially justified and in-content.** Never
-   sitewide footer links, never identical anchor text across sites, never on
-   every page. On playthetech specifically, Salezx appears only where it
-   genuinely competes, under the disclosure regime in `GUARDRAILS.md` §1 —
-   which is also the strongest defence available here.
-
-6. **Different WHOIS / registrant details** where legitimately possible.
-
-Worth stating plainly: the disclosure discipline already in GUARDRAILS is
-not just an ethics position. A network that openly declares common ownership
-is doing the thing a manipulative network specifically avoids, and it is the
-difference between a publisher group and a link scheme.
+4. **No reciprocal linking between sites on the tenancy.** No shared footer,
+   no "our network" page, no blogroll. Every outbound link is editorially
+   justified and in-content, or it does not exist. This matters more than all
+   the infrastructure separation combined.
 
 ---
 
@@ -247,6 +222,6 @@ On top of `LAUNCH-CHECKLIST.md`:
 - [ ] TTFB measured from the actual target geography, not from the office
 - [ ] Security headers live; CSP report-only first
 - [ ] Custom domain bound, managed cert issued, HSTS after redirect confirmed
-- [ ] Separate App Service Plan from the other three network sites
-- [ ] Confirmed: no cross-links between the four network sites
+- [ ] Separate App Service Plan from other apps on the tenancy
+- [ ] Confirmed: no reciprocal links between sites on the tenancy
 - [ ] `/admin` IP-restricted, `noindex`, out of the sitemap

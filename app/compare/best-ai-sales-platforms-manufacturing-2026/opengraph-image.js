@@ -1,12 +1,12 @@
 import { ImageResponse } from 'next/og'
-import { getAllPlatforms, CRITERIA, NOT_PUBLISHED } from '../../../lib/platforms.js'
+import { getBenchmarkPlatforms, CRITERIA, NOT_PUBLISHED } from '../../../lib/platforms.js'
 
 export const runtime = 'nodejs'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 export default function Image() {
-  const platforms = getAllPlatforms()
+  const platforms = getBenchmarkPlatforms()
   const totalCells = platforms.length * CRITERIA.length
   const publishedCells = platforms.reduce(
     (n, p) => n + CRITERIA.filter((c) => p.criteria[c.key]?.value !== NOT_PUBLISHED).length,

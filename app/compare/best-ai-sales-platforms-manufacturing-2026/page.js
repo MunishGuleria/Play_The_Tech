@@ -1,6 +1,18 @@
-import { getAllPlatforms, CRITERIA, VERIFIED_ON, NOT_PUBLISHED } from '../../../lib/platforms.js'
+import { getBenchmarkPlatforms, CRITERIA, VERIFIED_ON, NOT_PUBLISHED } from '../../../lib/platforms.js'
 import { SITE_NAME, absolute } from '../../../lib/site.js'
-import { longDate } from '../../../lib/format.js'
+import { longDate, splitAnswer } from '../../../lib/format.js'
+import {
+  graph,
+  organizationNode,
+  websiteNode,
+  webPageNode,
+  articleNode,
+  breadcrumbNode,
+  softwareNode,
+  faqNode,
+  itemListNode,
+  AUTHOR_REF,
+} from '../../../lib/schema.js'
 import PostActions from '../../../components/PostActions.js'
 
 // A static segment under /compare, so it takes precedence over the DB-driven
@@ -8,9 +20,11 @@ import PostActions from '../../../components/PostActions.js'
 const SLUG = 'best-ai-sales-platforms-manufacturing-2026'
 const URL = absolute(`/compare/${SLUG}`)
 
+// Names no vendor. The previous headline led with Salezx, which this site's
+// owner also owns — a placement no reader can audit and no data supports.
 const TITLE =
-  'Best AI Sales Platforms for Manufacturing in 2026: Salezx vs Salesforce vs Microsoft vs ServiceNow'
-const META_TITLE = 'AI Sales for Manufacturing (2026)'
+  'Best AI Sales Platforms for Manufacturing in 2026: six platforms across nine criteria'
+const META_TITLE = 'AI Sales Platforms for Manufacturing (2026)'
 const META_DESCRIPTION =
   'Six AI platforms benchmarked for complex B2B manufacturing across ERP connectivity, quoting, margin and channel — verified against vendor documentation.'
 
@@ -112,8 +126,18 @@ export const metadata = {
   },
 }
 
+const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+
+const countPublished = (p) =>
+  CRITERIA.filter((c) => p.criteria[c.key]?.value !== NOT_PUBLISHED).length
+
+const joinNames = (names) =>
+  names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+
 export default function ManufacturingBenchmarkPage() {
-  const platforms = getAllPlatforms()
+  // The six this page was written about, not every profile on the site — the
+  // prose below counts them out loud. The ERP cluster has its own roundup.
+  const platforms = getBenchmarkPlatforms()
   const verified = new Date(`${VERIFIED_ON}T00:00:00Z`).toISOString()
 
   // The honesty metric the page leads on: how many of the 54 cells any vendor
@@ -126,45 +150,91 @@ export default function ManufacturingBenchmarkPage() {
 
   const allSources = platforms.flatMap((p) => p.sources.map((s) => ({ ...s, platform: p.name })))
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: TITLE,
-    description: META_DESCRIPTION,
-    url: URL,
-    datePublished: VERIFIED_ON,
-    dateModified: verified,
-    author: { '@type': 'Organization', name: `${SITE_NAME} Editorial Research Team` },
-    publisher: { '@type': 'Organization', name: SITE_NAME, url: absolute('/') },
-    about: platforms.map((p) => ({
-      '@type': 'SoftwareApplication',
-      name: p.name,
-      applicationCategory: 'BusinessApplication',
-      url: p.homepage,
-      publisher: { '@type': 'Organization', name: p.vendor },
-    })),
-    citation: allSources.map((s) => s.url),
+  // Spelled out from the data rather than asserted, so the sentence cannot drift
+  // from the matrix it describes. Grouped by count, ties keeping the alphabetical
+  // order the sort above already gave them.
+  const groups = []
+  for (const p of [...platforms].sort(
+    (a, b) => countPublished(b) - countPublished(a),
+  )) {
+    const n = countPublished(p)
+    const last = groups[groups.length - 1]
+    if (last && last.n === n) last.names.push(p.name)
+    else groups.push({ n, names: [p.name] })
   }
+  const clauses = groups.map((g, i) => {
+    const names = joinNames(g.names)
+    const count = g.n === CRITERIA.length ? `all ${WORDS[g.n]}` : WORDS[g.n]
+    const each = g.names.length > 1 ? ' each' : ''
+    const verb = g.names.length > 1 ? 'publish' : 'publishes'
+    return i === 0
+      ? `${names} ${verb} an answer for ${count}${each}`
+      : `${names} for ${count}${each}`
+  })
+  const countLine =
+    clauses.length > 1
+      ? `${clauses.slice(0, -1).join(', ')} and ${clauses[clauses.length - 1]}`
+      : clauses[0]
 
-  const faqLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: FAQ.map((f) => ({
-      '@type': 'Question',
-      name: f.q,
-      acceptedAnswer: { '@type': 'Answer', text: f.a },
-    })),
-  }
+  // 7.01: a direct answer of at most 60 words under each question, then the rest.
+  const faq = FAQ.map((f) => {
+    const [lead, rest] = splitAnswer(f.a)
+    return { ...f, a: lead, more: rest }
+  })
 
-  const crumbs = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: absolute('/') },
-      { '@type': 'ListItem', position: 2, name: 'Comparisons', item: absolute('/') },
-      { '@type': 'ListItem', position: 3, name: 'AI Sales Platforms for Manufacturing', item: URL },
-    ],
-  }
+  // Rendered as the visible breadcrumb and used to build the BreadcrumbList, so
+  // the two cannot disagree the way they used to (6.06/2.06).
+  const path = `/compare/${SLUG}`
+  const crumbs = [
+    { name: 'Home', href: '/' },
+    { name: 'Platforms', href: '/platform' },
+    { name: 'AI Sales Platforms for Manufacturing', href: path },
+  ]
+
+  const breadcrumb = breadcrumbNode(path, crumbs)
+  const software = platforms.map(softwareNode)
+
+  const toc = [
+    { id: 'question', label: 'The question' },
+    { id: 'matrix', label: 'The matrix' },
+    { id: 'profiles', label: 'What each platform is' },
+    { id: 'differences', label: 'What decides it' },
+    { id: 'verdict', label: 'Verdict' },
+    { id: 'faq', label: 'FAQ' },
+    { id: 'sources', label: 'Sources' },
+  ]
+
+  const jsonLd = graph([
+    organizationNode(),
+    websiteNode(),
+    breadcrumb,
+    software,
+    itemListNode(
+      path,
+      'AI sales platforms for manufacturing',
+      platforms.map((p) => ({ name: p.name, url: absolute(`/platform/${p.slug}`) })),
+    ),
+    faqNode(path, faq),
+    webPageNode({
+      path,
+      name: META_TITLE,
+      description: META_DESCRIPTION,
+      about: software.map((n) => ({ '@id': n['@id'] })),
+      breadcrumbId: breadcrumb['@id'],
+      dateModified: verified,
+    }),
+    articleNode({
+      path,
+      headline: TITLE,
+      description: META_DESCRIPTION,
+      author: AUTHOR_REF(),
+      datePublished: VERIFIED_ON,
+      dateModified: verified,
+      image: absolute(`${path}/opengraph-image`),
+      about: software.map((n) => ({ '@id': n['@id'] })),
+      citation: allSources.map((s) => s.url),
+    }),
+  ])
 
   return (
     <>
@@ -172,9 +242,13 @@ export default function ManufacturingBenchmarkPage() {
         <div className="shell">
           <nav className="breadcrumb" aria-label="Breadcrumb">
             <ol>
-              <li><a href="/">Home</a></li>
-              <li><a href="/platform">Platforms</a></li>
-              <li aria-current="page">AI Sales Platforms for Manufacturing</li>
+              {crumbs.map((c, i) =>
+                i === crumbs.length - 1 ? (
+                  <li key={c.href} aria-current="page">{c.name}</li>
+                ) : (
+                  <li key={c.href}><a href={c.href}>{c.name}</a></li>
+                ),
+              )}
             </ol>
           </nav>
 
@@ -203,7 +277,7 @@ export default function ManufacturingBenchmarkPage() {
             </div>
 
             <section className="industry-section" data-reveal>
-              <h2>The question this page answers</h2>
+              <h2 id="question">Which AI platform survives a complex catalogue?</h2>
               <p>
                 &ldquo;Which AI tool is best?&rdquo; is unanswerable. The useful question for an industrial
                 seller is narrower: <strong>which AI platform still works when your team sells thousands of
@@ -222,10 +296,24 @@ export default function ManufacturingBenchmarkPage() {
                 publish an answer for <strong>{publishedCells}</strong>. Margin protection and dealer
                 management are the two emptiest columns in the category.
               </p>
+              <h3>A high count is not a high score</h3>
+              <p>
+                The &ldquo;criteria published&rdquo; number counts how many of the nine a vendor has
+                written down anywhere on its own site. That is all it measures. A vendor whose
+                marketing pages name every capability will score higher than one publishing narrow
+                technical documentation, even where the second product is deeper. On this page{' '}
+                {countLine}. Read that as a difference in how much each vendor writes about itself,
+                not as a ranking &mdash; and read the evidence column, where some published answers
+                are a named feature with no detail behind it and say so.
+              </p>
+              <p>
+                Platforms are ordered alphabetically throughout, including in the matrix and the
+                source list. No vendor holds the first column by editorial choice.
+              </p>
             </section>
 
             <section className="industry-section" data-reveal>
-              <h2>The benchmark matrix</h2>
+              <h2 id="matrix">How do the six compare across nine criteria?</h2>
 
               {/* Phones read the matrix criterion by criterion; a seven-column
                   table at 360px is a sideways scroll nobody performs. */}
@@ -312,7 +400,7 @@ export default function ManufacturingBenchmarkPage() {
             </section>
 
             <section className="industry-profiles" data-reveal>
-              <h2>What each platform is, in one paragraph</h2>
+              <h2 id="profiles">What is each platform?</h2>
 
               {platforms.map((p) => {
                 const published = CRITERIA.filter((c) => p.criteria[c.key]?.value !== NOT_PUBLISHED).length
@@ -360,7 +448,7 @@ export default function ManufacturingBenchmarkPage() {
             </section>
 
             <section className="industry-section" data-reveal>
-              <h2>Three differences that actually decide this</h2>
+              <h2 id="differences">What actually decides this?</h2>
 
               <h3>1. Two of the six are not sales tools</h3>
               <p>
@@ -395,7 +483,7 @@ export default function ManufacturingBenchmarkPage() {
             </section>
 
             <section className="industry-section verdict-section" data-reveal>
-              <h2>Verdict</h2>
+              <h2 id="verdict">Which platform should you choose?</h2>
               <p>
                 There is no single winner, because the six are not competing for the same job. Match the
                 platform to where your sellers already work and where your pricing data already lives.
@@ -410,17 +498,18 @@ export default function ManufacturingBenchmarkPage() {
             </section>
 
             <section className="industry-section" data-reveal>
-              <h2>Frequently asked questions</h2>
-              {FAQ.map((f) => (
+              <h2 id="faq">Frequently asked questions</h2>
+              {faq.map((f) => (
                 <div key={f.q} className="faq-item">
                   <h3>{f.q}</h3>
                   <p>{f.a}</p>
+                  {f.more ? <p className="faq-more">{f.more}</p> : null}
                 </div>
               ))}
             </section>
 
             <section className="sources" data-reveal>
-              <h2>Sources</h2>
+              <h2 id="sources">Sources</h2>
               <ol>
                 {allSources.map((s, i) => (
                   <li key={s.url} id={`source-${i + 1}`}>
@@ -460,6 +549,15 @@ export default function ManufacturingBenchmarkPage() {
           </article>
 
           <aside className="post-aside" aria-label="Benchmark facts and platform links">
+            <div className="aside-card toc">
+              <p className="aside-label">On this page</p>
+              <ol>
+                {toc.map((t) => (
+                  <li key={t.id}><a href={`#${t.id}`}>{t.label}</a></li>
+                ))}
+              </ol>
+            </div>
+
             <div className="aside-card">
               <p className="aside-label">Benchmark at a glance</p>
               <dl className="aside-facts">
@@ -508,8 +606,6 @@ export default function ManufacturingBenchmarkPage() {
       </div>
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
     </>
   )
 }

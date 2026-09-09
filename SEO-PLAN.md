@@ -43,8 +43,6 @@ Two constraints from `GUARDRAILS.md` bind everything downstream:
 - **R4.1–4.3** — "Playtech" is an unrelated FTSE 250 company. Branded search is
   unwinnable and must not be pursued. Every growth assumption rests on
   long-tail query and prompt coverage. The domain is a container, not an asset.
-- **R8.1** — the four network sites must never cross-link. This overrides any
-  internal-linking advice that would suggest otherwise.
 
 ---
 
@@ -79,13 +77,12 @@ Done. Do not redo these; protect them with gates instead.
 | `Article` JSON-LD with `about` naming both tools | 6.07 | comparison page |
 | No `Review` / `AggregateRating` anywhere | C4, 6.13, R6.3 | asserted in `scripts/smoke.mjs` |
 | OG + Twitter card, generated 1200×630 images | 12.01–12.03 | `app/opengraph-image.js`, `lib/og.js` |
-| `llms.txt` with sourcing and ownership statement | 7.14, C1 | `app/llms.txt/route.js` |
+| `llms.txt` with the sourcing statement | 7.14, C1 | `app/llms.txt/route.js` |
 | RSS feed | discovery | `app/feed.xml/route.js` |
 | Security headers, CSP report-only first | 15.09 | `next.config.mjs` |
 | Skip link, landmarks, one `<main>` | 11.01, 11.05 | `app/layout.js` |
 | Performance budget in CI, zero third-party scripts | 10.10, 10.13 | `.github/lighthouse-budget.json` |
 | Post-deploy crawler smoke test from outside Azure | 1.06, 8.12 | `scripts/smoke.mjs`, `smoke` job |
-| Ownership disclosure above the table | R1.1 | `mentionsSalezx()` |
 | **P1.4** meta description column, separate from summary | 4.03 | `schema.sql` — migrated, unused |
 | **P1.6** homepage off `force-dynamic`, `revalidate = 300` | 10.04 | `app/page.js` |
 | **A2** authors table + `author_id` FK | 5.01 | `schema.sql` — migrated, unused |
@@ -365,11 +362,10 @@ rechecked? Who pays for this?* — each with a 40–60 word answer-first paragra
 page an answer engine reads to decide whether a figure is trustworthy.
 
 `/about` carries the **canonical brand fact sheet** (5.10): founding year,
-headcount, categories covered, publishing cadence, ownership — written once and
-repeated *identically* in schema, in `llms.txt`, on LinkedIn and in every
-directory. Contradictions across sources make an engine hedge, or cite someone
-clearer. Contact as HTML text, never an image (5.07). Must carry the Salezx
-ownership statement plainly, as shared ownership, not "affiliated with" (R1.2).
+headcount, categories covered and publishing cadence — written once and
+repeated *identically* in schema, in `llms.txt` and in every directory.
+Contradictions across sources make an engine hedge, or cite someone clearer.
+Contact as HTML text, never an image (5.07).
 
 ### B5 · `/privacy` and `/terms` (5.09)
 

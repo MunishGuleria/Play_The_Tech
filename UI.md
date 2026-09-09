@@ -268,7 +268,7 @@ carries a caption naming the product and capture date, and alt text
 describing what it shows. A 1px `--rule` border, no drop shadow, no browser
 chrome mockup, no perspective tilt.
 
-**Footer.** Ownership disclosure, contact, legal. Text, not icons. No
+**Footer.** Contact, legal. Text, not icons. No
 `/admin` link.
 
 ---

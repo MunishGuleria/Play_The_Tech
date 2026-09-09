@@ -2,6 +2,7 @@ import { query, POSTS } from '../../lib/db.js'
 import { SITE_NAME, SITE_DESCRIPTION, CONTACT_EMAIL, siteUrl, absolute } from '../../lib/site.js'
 import { longDate } from '../../lib/format.js'
 import { COMPARISONS, INDUSTRIES, PLATFORMS } from '../../components/nav-data.js'
+import { STATIC_COMPARISONS } from '../../lib/static-comparisons.js'
 
 export const revalidate = 3600
 
@@ -82,6 +83,15 @@ export async function GET() {
     const pair = p.type === 'roundup' ? 'multi-tool roundup' : `${p.tool_1} vs ${p.tool_2}`
     lines.push(`- [${p.title}](${absolute(`/compare/${p.slug}`)}): ${pair}. Updated ${longDate(p.updated_at)}.`)
     if (p.summary) lines.push(`  ${p.summary}`)
+  }
+
+  // The two static roundups live outside the posts table, so the loop above
+  // never sees them. Listed by hand or they are invisible to anything reading
+  // this file — which is the one thing /llms.txt exists to prevent.
+  for (const c of STATIC_COMPARISONS) {
+    const href = absolute(`/compare/${c.slug}`)
+    lines.push(`- [${c.title}](${href}): multi-platform benchmark — ${c.pair}. Verified ${longDate(c.updated_at)}.`)
+    lines.push(`  ${c.summary}`)
   }
 
   lines.push('', '## Industry AI Sales Benchmarks', '')

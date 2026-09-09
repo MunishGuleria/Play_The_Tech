@@ -1,10 +1,36 @@
-import { getAllPlatforms, CRITERIA, VERIFIED_ON, NOT_PUBLISHED } from '../../lib/platforms.js'
+import {
+  getAllPlatforms,
+  getBenchmarkPlatforms,
+  getErpPlatforms,
+  CRITERIA,
+  NOT_PUBLISHED,
+} from '../../lib/platforms.js'
 import { SITE_NAME, absolute } from '../../lib/site.js'
-import { longDate } from '../../lib/format.js'
 
 const TITLE = 'AI Sales Platform Profiles (2026)'
 const DESCRIPTION =
-  'Verified vendor profiles of AI enterprise sales platforms: Salezx, Agentforce, Dynamics 365, SAP Joule, ServiceNow, and UiPath with pricing and limits.'
+  'Verified vendor profiles of AI sales and ERP platforms: Salezx, Agentforce, Dynamics 365, SAP Joule, ServiceNow, UiPath, Oracle Fusion, Infor, Epicor and NetSuite.'
+
+// Two research passes, two roundups. Grouping them keeps the directory honest
+// about which comparison each profile was written for.
+const GROUPS = [
+  {
+    key: 'sales',
+    heading: 'AI sales and CRM platforms',
+    blurb: 'Benchmarked head to head in the',
+    href: '/compare/best-ai-sales-platforms-manufacturing-2026',
+    linkText: 'manufacturing and complex B2B comparison',
+    get: getBenchmarkPlatforms,
+  },
+  {
+    key: 'erp',
+    heading: 'ERP-native AI',
+    blurb: 'AI that runs inside the ERP rather than connecting to it. Compared in the',
+    href: '/compare/erp-ai-platforms-2026',
+    linkText: 'ERP AI roundup',
+    get: getErpPlatforms,
+  },
+]
 
 export const metadata = {
   title: TITLE,
@@ -31,7 +57,6 @@ export const metadata = {
 
 export default function PlatformIndexPage() {
   const platforms = getAllPlatforms()
-  const verified = new Date(`${VERIFIED_ON}T00:00:00Z`).toISOString()
 
   const itemList = {
     '@context': 'https://schema.org',
@@ -69,40 +94,47 @@ export default function PlatformIndexPage() {
           <p className="lead">
             One page per platform, built only from what the vendor publishes about itself. Pricing tiers,
             named integrations, implementation time and governance &mdash; with &ldquo;{NOT_PUBLISHED}&rdquo;
-            wherever the vendor has not written it down. All figures read on {longDate(verified)}.
-          </p>
-          <p className="lead">
-            Benchmarked head to head in the{' '}
-            <a href="/compare/best-ai-sales-platforms-manufacturing-2026">
-              manufacturing and complex B2B comparison
-            </a>
-            .
+            wherever the vendor has not written it down. Each profile carries the date its figures were
+            read from source.
           </p>
         </div>
       </div>
 
       <div className="shell industry-hub-shell">
-        <div className="industry-hub-grid">
-          {platforms.map((p) => {
-            const published = CRITERIA.filter((c) => p.criteria[c.key]?.value !== NOT_PUBLISHED).length
-            const entry = p.pricing.tiers.find((t) => t.price !== NOT_PUBLISHED)
-            return (
-              <a key={p.slug} className="industry-hub-card" href={`/platform/${p.slug}`} data-reveal>
-                <div className="industry-card-top">
-                  <span className="industry-top-badge">{p.vendor}</span>
-                </div>
-                <h2 className="industry-card-title">{p.name}</h2>
-                <p className="industry-card-desc">{p.oneLine}</p>
-                <div className="industry-card-meta">
-                  <span>
-                    {entry ? entry.price : NOT_PUBLISHED} &middot; {published}/{CRITERIA.length} criteria published
-                  </span>
-                  <span className="industry-arrow">Read the profile &rarr;</span>
-                </div>
-              </a>
-            )
-          })}
-        </div>
+        {GROUPS.map((g) => {
+          const group = g.get()
+          if (!group.length) return null
+          return (
+            <section key={g.key} className="industry-section" data-reveal>
+              <h2>{g.heading}</h2>
+              <p className="lead">
+                {g.blurb} <a href={g.href}>{g.linkText}</a>.
+              </p>
+              <div className="industry-hub-grid">
+                {group.map((p) => {
+                  const published = CRITERIA.filter((c) => p.criteria[c.key]?.value !== NOT_PUBLISHED).length
+                  const entry = p.pricing.tiers.find((t) => t.price !== NOT_PUBLISHED)
+                  return (
+                    <a key={p.slug} className="industry-hub-card" href={`/platform/${p.slug}`} data-reveal>
+                      <div className="industry-card-top">
+                        <span className="industry-top-badge">{p.vendor}</span>
+                      </div>
+                      {/* h3, not h2 — the group heading above is the h2 now. */}
+                      <h3 className="industry-card-title">{p.name}</h3>
+                      <p className="industry-card-desc">{p.oneLine}</p>
+                      <div className="industry-card-meta">
+                        <span>
+                          {entry ? entry.price : NOT_PUBLISHED} &middot; {published}/{CRITERIA.length} criteria published
+                        </span>
+                        <span className="industry-arrow">Read the profile &rarr;</span>
+                      </div>
+                    </a>
+                  )
+                })}
+              </div>
+            </section>
+          )
+        })}
       </div>
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />

@@ -3,6 +3,8 @@ import { longDate, isoDate } from '../lib/format.js'
 import { renderContent, extractFirstTable } from '../lib/markdown.js'
 import { SITE_NAME, SITE_DESCRIPTION, CONTACT_EMAIL, absolute } from '../lib/site.js'
 import { getAllIndustries } from '../lib/industries.js'
+import { getAllPlatforms } from '../lib/platforms.js'
+import { staticComparisonCards } from '../lib/static-comparisons.js'
 
 // Was force-dynamic, which put an Azure Postgres round trip in front of every
 // byte of HTML — TTFB is charged straight to FCP and LCP. The index only
@@ -226,20 +228,46 @@ export default async function Home() {
     )
   }
 
-  const [lead, ...rest] = posts
-  const { html } = renderContent(lead.content, {
-    caption: lead.type === 'roundup' ? lead.title : `${lead.tool_1} compared with ${lead.tool_2}`,
-    verifiedFallback: lead.updated_at,
-  })
-  const leadTable = extractFirstTable(html)
-  const tools = [...new Set(posts.flatMap((p) => [p.tool_1, p.tool_2]))].sort()
+  // "Newest comparison" means newest, across both kinds. The lead used to be
+  // hardcoded to posts[0], so a static roundup could never hold the slot however
+  // recent it was — and any edit to an old post promoted it over genuinely new
+  // work. Sort everything together, then take the top.
+  const everything = [...posts, ...staticComparisonCards()].sort(
+    (a, b) => new Date(b.updated_at) - new Date(a.updated_at),
+  )
+  const [lead, ...catalogue] = everything
+
+  // Only a database post carries markdown to lift a table out of; a static
+  // roundup renders its summary and links through to its own tables.
+  const leadTable = lead.content
+    ? extractFirstTable(
+        renderContent(lead.content, {
+          caption: lead.type === 'roundup' ? lead.title : `${lead.tool_1} compared with ${lead.tool_2}`,
+          verifiedFallback: lead.updated_at,
+        }).html,
+      )
+    : null
+
+  // Platform profiles are the deeper page for a vendor, so they win the link
+  // where a name appears both as a compared tool and as a profile.
+  const profiles = getAllPlatforms()
+  const profileNames = new Set(profiles.map((p) => p.name))
+  const tools = [
+    ...profiles.map((p) => ({ name: p.name, href: `/platform/${p.slug}` })),
+    ...[...new Set(posts.flatMap((p) => [p.tool_1, p.tool_2]))]
+      .filter((t) => t && !profileNames.has(t))
+      .map((t) => {
+        const match = posts.find((p) => p.tool_1 === t || p.tool_2 === t)
+        return { name: t, href: `/compare/${match.slug}` }
+      }),
+  ].sort((a, b) => a.name.localeCompare(b.name))
 
   const list = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'Software comparisons',
-    numberOfItems: posts.length,
-    itemListElement: posts.map((p, i) => ({
+    numberOfItems: everything.length,
+    itemListElement: everything.map((p, i) => ({
       '@type': 'ListItem',
       position: i + 1,
       url: absolute(`/compare/${p.slug}`),
@@ -250,7 +278,11 @@ export default async function Home() {
   return (
     <>
       <div className="shell">
-        <Head postCount={posts.length} toolCount={tools.length} lastUpdated={posts[0].updated_at} />
+        <Head
+          postCount={everything.length}
+          toolCount={tools.length}
+          lastUpdated={everything[0].updated_at}
+        />
 
         {/* The sample spread: the newest comparison, printed with its own table. */}
         <section className="featured" id="comparisons" aria-labelledby="featured-heading" data-reveal>
@@ -259,7 +291,7 @@ export default async function Home() {
             <a href={`/compare/${lead.slug}`}>{lead.title}</a>
           </h2>
           <p className="featured-meta">
-            <span>{pairLabel(lead)}</span>
+            <span>{lead.pair || pairLabel(lead)}</span>
             {lead.author ? <span>By {lead.author}</span> : null}
             <span>
               <time dateTime={isoDate(lead.updated_at)}>{longDate(lead.updated_at)}</time>
@@ -281,17 +313,17 @@ export default async function Home() {
         <IndustryShowcase />
 
         {/* More Comparisons Grid */}
-        {rest.length > 0 ? (
+        {catalogue.length > 0 ? (
           <section className="home-section" aria-labelledby="all-heading">
             <div className="section-head">
               <div>
                 <p className="section-eyebrow">Catalogue</p>
                 <h2 id="all-heading">Head-to-Head &amp; Category Comparisons</h2>
               </div>
-              <span className="count">{rest.length} comparisons</span>
+              <span className="count">{catalogue.length} comparisons</span>
             </div>
             <ul className="card-grid">
-              {rest.map((p) => (
+              {catalogue.map((p) => (
                 <li key={p.slug} className="card" data-reveal>
                   <div className="card-top">
                     <span className={`tag ${p.type}`}>{p.type}</span>
@@ -301,22 +333,34 @@ export default async function Home() {
                   </div>
                   <div className="card-main">
                     <h3><a className="card-link" href={`/compare/${p.slug}`}>{p.title}</a></h3>
-                    <p className="card-pair">{pairLabel(p)}</p>
+                    <p className="card-pair">{p.pair || pairLabel(p)}</p>
                     {p.summary ? <p className="card-summary">{p.summary}</p> : null}
                   </div>
                   <div className="card-media">
-                    <picture>
-                      <source srcSet={`/images/thumbs/${p.slug}.webp`} type="image/webp" />
+                    {p.image ? (
                       <img
                         className="card-thumb"
-                        src={`/images/thumbs/${p.slug}.jpg`}
+                        src={p.image}
                         alt={`${p.title} benchmark preview`}
                         width={150}
                         height={88}
                         loading="lazy"
                         decoding="async"
                       />
-                    </picture>
+                    ) : (
+                      <picture>
+                        <source srcSet={`/images/thumbs/${p.slug}.webp`} type="image/webp" />
+                        <img
+                          className="card-thumb"
+                          src={`/images/thumbs/${p.slug}.jpg`}
+                          alt={`${p.title} benchmark preview`}
+                          width={150}
+                          height={88}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </picture>
+                    )}
                   </div>
                 </li>
               ))}
@@ -334,17 +378,14 @@ export default async function Home() {
             <span className="count">{tools.length} active platforms</span>
           </div>
           <ul className="tool-index">
-            {tools.map((t) => {
-              const match = posts.find((p) => p.tool_1 === t || p.tool_2 === t)
-              return (
-                <li key={t}>
-                  <a href={`/compare/${match.slug}`}>
-                    <span>{t}</span>
-                    <small>Compare →</small>
-                  </a>
-                </li>
-              )
-            })}
+            {tools.map((t) => (
+              <li key={t.name}>
+                <a href={t.href}>
+                  <span>{t.name}</span>
+                  <small>{t.href.startsWith('/platform/') ? 'Profile →' : 'Compare →'}</small>
+                </a>
+              </li>
+            ))}
           </ul>
         </section>
 

@@ -1,11 +1,12 @@
 import { query, POSTS } from '../lib/db.js'
 import { siteUrl } from '../lib/site.js'
 import { getAllIndustries } from '../lib/industries.js'
-import { getAllPlatforms, VERIFIED_ON } from '../lib/platforms.js'
+import { getAllPlatforms, platformVerifiedOn, VERIFIED_ON, VERIFIED_ON_ERP } from '../lib/platforms.js'
 
-// Static route under /compare — it takes precedence over the DB-driven [slug],
-// so it never appears in the posts query and has to be listed explicitly.
+// Static routes under /compare — they take precedence over the DB-driven [slug],
+// so they never appear in the posts query and have to be listed explicitly.
 const MANUFACTURING_BENCHMARK = 'best-ai-sales-platforms-manufacturing-2026'
+const ERP_ROUNDUP = 'erp-ai-platforms-2026'
 
 export const revalidate = 3600
 
@@ -25,6 +26,7 @@ export default async function sitemap() {
   const industries = getAllIndustries()
   const platforms = getAllPlatforms()
   const platformsVerified = new Date(`${VERIFIED_ON}T00:00:00Z`)
+  const erpVerified = new Date(`${VERIFIED_ON_ERP}T00:00:00Z`)
 
   return [
     { url: `${base}/`, lastModified: new Date(newest), changeFrequency: 'weekly', priority: 1 },
@@ -43,14 +45,21 @@ export default async function sitemap() {
       priority: 1.0,
     },
     {
+      url: `${base}/compare/${ERP_ROUNDUP}`,
+      lastModified: erpVerified,
+      changeFrequency: 'weekly',
+      priority: 1.0,
+    },
+    {
       url: `${base}/platform`,
-      lastModified: platformsVerified,
+      // The index lists every profile, so it is as fresh as the newest pass.
+      lastModified: erpVerified,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     ...platforms.map((p) => ({
       url: `${base}/platform/${p.slug}`,
-      lastModified: platformsVerified,
+      lastModified: new Date(`${platformVerifiedOn(p)}T00:00:00Z`),
       changeFrequency: 'weekly',
       priority: 0.8,
     })),

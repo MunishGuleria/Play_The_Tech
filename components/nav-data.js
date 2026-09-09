@@ -38,14 +38,10 @@ export const INDUSTRIES = [
   },
 ]
 
+// Salezx sits near the bottom, not the top. This is the site's own navigation,
+// so a vendor holding the first slot in it is an editorial choice a reader
+// cannot audit — the benchmark tables sort alphabetically for the same reason.
 export const PLATFORMS = [
-  {
-    href: '/platform/salezx',
-    name: 'Salezx',
-    vendor: 'Salezx',
-    note: 'AI Sales Brain for Teams & M365',
-    icon: 'layers',
-  },
   {
     href: '/platform/salesforce-agentforce',
     name: 'Salesforce Agentforce',
@@ -81,12 +77,47 @@ export const PLATFORMS = [
     note: 'Embedded S/4HANA ERP copilot',
     icon: 'layers',
   },
+  {
+    href: '/platform/oracle-fusion-ai-agents',
+    name: 'Oracle Fusion AI Agents',
+    vendor: 'Oracle',
+    note: 'Agent Studio bundled at no extra cost',
+    icon: 'layers',
+  },
+  {
+    href: '/platform/infor-velocity-suite',
+    name: 'Infor Velocity Suite',
+    vendor: 'Infor',
+    note: 'Flat-fee industry AI for CloudSuite',
+    icon: 'layers',
+  },
+  {
+    href: '/platform/epicor-prism',
+    name: 'Epicor Prism',
+    vendor: 'Epicor',
+    note: 'Vertical agents, outcomes-based pricing',
+    icon: 'layers',
+  },
+  {
+    href: '/platform/salezx',
+    name: 'Salezx',
+    vendor: 'Salezx',
+    note: 'AI Sales Brain for Teams & M365',
+    icon: 'layers',
+  },
+  {
+    href: '/platform/netsuite-next',
+    name: 'NetSuite Next',
+    vendor: 'Oracle NetSuite',
+    note: 'Ask Oracle & MCP connector',
+    icon: 'layers',
+  },
 ]
 
 export const BROWSE = [
   { href: '/', name: 'Home', note: 'Latest benchmark index', icon: 'home' },
   { href: '/industry', name: 'Industry Benchmarks', note: 'All 4 sector guides', icon: 'analytics' },
-  { href: '/platform', name: 'Platform Profiles', note: '6 vendors, primary sources', icon: 'layers' },
+  { href: '/platform', name: 'Platform Profiles', note: '10 vendors, primary sources', icon: 'layers' },
   { href: '/faq', name: 'AI Sales FAQ & Answers', note: 'AEO & Generative AI search guide', icon: 'faq' },
   { href: '/compare/best-ai-sales-agents-2026', name: 'Rankings 2026', note: '8 platforms ranked', icon: 'ranking' },
 ]
@@ -114,6 +145,12 @@ export const COMPARISONS = [
     href: '/compare/best-ai-sales-platforms-manufacturing-2026',
     name: 'AI Platforms for Manufacturing',
     note: '6 platforms — 9 criteria',
+    icon: 'target',
+  },
+  {
+    href: '/compare/erp-ai-platforms-2026',
+    name: 'ERP AI Platforms (2026)',
+    note: 'How 6 ERP vendors charge for AI',
     icon: 'target',
   },
   {

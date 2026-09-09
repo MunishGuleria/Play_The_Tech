@@ -1,6 +1,7 @@
 import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { SITE_NAME, SITE_DESCRIPTION, CONTACT_EMAIL, siteUrl, absolute } from '../lib/site.js'
+import { organizationNode, websiteNode } from '../lib/schema.js'
 import Header from '../components/Header.js'
 import { INDUSTRIES, COMPARISONS, PLATFORMS } from '../components/nav-data.js'
 
@@ -89,30 +90,12 @@ export default function RootLayout({ children }) {
   const cls = `${sans.variable} ${mono.variable} motion-on`
   const year = new Date().getFullYear()
 
+  // Same @ids the page-level graphs reference (lib/schema.js), so the site-wide
+  // WebSite/Organization emitted here and the Article emitted on a page resolve
+  // to one entity rather than to duplicates (6.15).
   const websiteSchema = {
     '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: SITE_NAME,
-    alternateName: ['Play The Tech', 'playthetech.com', 'PlayTheTech Benchmarks'],
-    url: siteUrl(),
-    description: SITE_DESCRIPTION,
-    publisher: {
-      '@type': 'Organization',
-      name: SITE_NAME,
-      url: siteUrl(),
-      logo: {
-        '@type': 'ImageObject',
-        url: absolute('/icon-512x512.png'),
-      },
-    },
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${siteUrl()}/#comparisons`,
-      },
-      'query-input': 'required name=search_term_string',
-    },
+    '@graph': [organizationNode(), { ...websiteNode(), alternateName: ['Play The Tech', 'PlayTheTech Benchmarks'] }],
   }
 
   const siteNavigationSchema = {
@@ -137,7 +120,7 @@ export default function RootLayout({ children }) {
         '@type': 'SiteNavigationElement',
         position: 3,
         name: 'Platform Profiles',
-        description: 'Primary vendor documentation profiles for Salezx, Agentforce, Copilot, Joule, ServiceNow & UiPath',
+        description: 'Primary vendor documentation profiles for ten AI sales and ERP platforms',
         url: absolute('/platform'),
       },
       {
