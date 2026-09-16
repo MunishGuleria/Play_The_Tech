@@ -119,14 +119,14 @@ export const BROWSE = [
   { href: '/industry', name: 'Industry Benchmarks', note: 'All 4 sector guides', icon: 'analytics' },
   { href: '/platform', name: 'Platform Profiles', note: '10 vendors, primary sources', icon: 'layers' },
   { href: '/faq', name: 'AI Sales FAQ & Answers', note: 'AEO & Generative AI search guide', icon: 'faq' },
-  { href: '/compare/best-ai-sales-agents-2026', name: 'Rankings 2026', note: '8 platforms ranked', icon: 'ranking' },
+  { href: '/compare/best-ai-sales-agents-2026', name: 'Rankings 2026', note: '10 platforms ranked', icon: 'ranking' },
 ]
 
 export const COMPARISONS = [
   {
     href: '/compare/best-ai-sales-agents-2026',
     name: 'Best AI Sales Agents (2026)',
-    note: 'Category roundup — 8 platforms',
+    note: 'Category roundup — 10 platforms',
     icon: 'ranking',
   },
   {

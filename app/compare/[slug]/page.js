@@ -88,7 +88,7 @@ export function getPostSeoMetadata(post) {
     },
     'best-ai-sales-agents-2026': {
       title: 'Best AI Sales Agents (2026)',
-      description: 'Rankings of the 8 best AI sales agents and copilots in 2026. Compare Salesforce Agentforce, Microsoft Copilot, Salezx, and 11x on architecture & cost.',
+      description: 'Rankings of the 10 best AI sales agents and copilots in 2026. Compare Agentforce, Microsoft Copilot, Relevance AI, Instantly and Salezx on architecture & cost.',
     },
     'microsoft-365-copilot-vs-salesforce-agentforce': {
       title: 'Microsoft Copilot vs Agentforce (2026)',
